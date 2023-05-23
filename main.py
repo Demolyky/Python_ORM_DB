@@ -6,7 +6,7 @@ from json_reader import populate_database_from_json
 # url в формате postgresql://postgres:<password>@localhost:5432/postgres
 url_db = 'postgresql://demolyky:123456@localhost:5432/postgres'
 
-def get_shops(publisher_name, publisher_id):
+def get_shops(data):
     # подключаемся к БД
     engine = create_engine(url_db)
 
@@ -18,15 +18,16 @@ def get_shops(publisher_name, publisher_id):
 
     # Выполняем запрос и фильтруем результаты
     query = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale) \
-        .join(Book.publisher) \
-        .join(Stock, Stock.id_book == Book.id) \
-        .join(Sale, Sale.id_stock == Stock.id) \
-        .join(Shop, Shop.id == Stock.id_shop)
+        .select_from(Publisher) \
+        .join(Book) \
+        .join(Stock) \
+        .join(Sale) \
+        .join(Shop)
 
-    if publisher_name:
-        query = query.filter(Publisher.name == publisher_name)
-    if publisher_id:
-        query = query.filter(Publisher.id == publisher_id)
+    if not data.isdigit():
+        query = query.filter(Publisher.name == data)
+    else:
+        query = query.filter(Publisher.id == data)
 
     # Выполняем запрос и выводим результаты
     sales = query.order_by(Sale.date_sale.desc()).all()
@@ -36,11 +37,6 @@ def get_shops(publisher_name, publisher_id):
 
 
 if __name__ == '__main__':
-    # заполняем БД из Json-файла
-    # populate_database_from_json('tests_data.json', url_db)
-
-    # Получаем информацию от пользователя
-    publisher_name = input('Введите имя издателя (оставьте пустым, если не хотите искать по имени): ')
-    publisher_id = input('Введите ID издателя (оставьте пустым, если не хотите искать по ID): ')
-
-    get_shops(publisher_name, publisher_id)
+    populate_database_from_json('tests_data.json', url_db)
+    data = input('Введите имя или айди: ')
+    get_shops(data)
