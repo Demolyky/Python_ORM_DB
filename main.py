@@ -6,7 +6,7 @@ from json_reader import populate_database_from_json
 # url в формате postgresql://postgres:<password>@localhost:5432/postgres
 url_db = 'postgresql://demolyky:123456@localhost:5432/postgres'
 
-def print_db():
+def get_shops(publisher_name, publisher_id):
     # подключаемся к БД
     engine = create_engine(url_db)
 
@@ -15,10 +15,6 @@ def print_db():
 
     # получаем экземпляр класса Session
     session = Session()
-
-    # Получаем информацию от пользователя
-    publisher_name = input('Введите имя издателя (оставьте пустым, если не хотите искать по имени): ')
-    publisher_id = input('Введите ID издателя (оставьте пустым, если не хотите искать по ID): ')
 
     # Выполняем запрос и фильтруем результаты
     query = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale) \
@@ -39,12 +35,12 @@ def print_db():
         print(f'{sale[0]: <40} | {sale[1]: <10} | {sale[2]: <8} | {sale[3].strftime("%d-%m-%Y")}')
 
 
-def main():
+if __name__ == '__main__':
     # заполняем БД из Json-файла
     # populate_database_from_json('tests_data.json', url_db)
 
-    print_db()
+    # Получаем информацию от пользователя
+    publisher_name = input('Введите имя издателя (оставьте пустым, если не хотите искать по имени): ')
+    publisher_id = input('Введите ID издателя (оставьте пустым, если не хотите искать по ID): ')
 
-
-if __name__ == '__main__':
-    main()
+    get_shops(publisher_name, publisher_id)
